@@ -1,0 +1,8 @@
+.git-ignore/
+tags
+crlog
+*.swp
+*.o
+*.d
+*.i
+*.so
