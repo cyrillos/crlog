@@ -104,7 +104,7 @@ all: $(CRLOG_SO) $(CLI)
 	@true
 .PHONY: all
 
-test:
+test: $(CLI)
 	$(Q) tests/test00
 .PHONY: test
 
