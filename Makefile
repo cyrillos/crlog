@@ -44,7 +44,8 @@ $(CRLOG_SO): src/built-in.o
 	$(Q) $(CC) -shared $(cflags-so) -o $@ $^
 
 CLI			:= crlog
-CLI-LIBS		:= -lffi
+CLI-LIBS		:= $(shell pkg-config --libs libffi)
+CFLAGS			+= $(shell pkg-config --cflags libffi)
 
 $(eval $(call gen-built-in,cli))
 
