@@ -105,7 +105,9 @@ all: $(CRLOG_SO) $(CLI)
 	@true
 .PHONY: all
 
+test: override CPP=g++
 test: $(CLI)
+	$(Q) $(CPP) tests/fstream.cpp -o tests/fstream
 	$(Q) tests/test00
 .PHONY: test
 
