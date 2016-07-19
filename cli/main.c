@@ -14,6 +14,7 @@ enum {
 	MODE_FPRINTF,
 	MODE_SPRINTF,
 	MODE_DPRINTF,
+	MODE_FPUTS,
 };
 
 int main(int argc, char *argv[])
@@ -55,6 +56,8 @@ int main(int argc, char *argv[])
 				mode = MODE_SPRINTF;
 			} else if (strcmp(optarg, "dprintf") == 0) {
 				mode = MODE_DPRINTF;
+			} else if (strcmp(optarg, "fputs") == 0) {
+				mode = MODE_FPUTS;
 			} else
 				goto usage;
 			break;
@@ -148,6 +151,23 @@ int main(int argc, char *argv[])
 				str1, str2, 'c', (long)-4, (short)2,
 				(unsigned long)2);
 		}
+		break;
+	}
+	case MODE_FPUTS:
+	{
+		FILE *f = fdopen(fdout, "w");
+
+		for (i = 0; i < niter; i++) {
+			fputs("Some message ", f);
+			fputs(str1, f);
+			putc(' ', f);
+			fputs(str2, f);
+			putc(' ', f);
+			putc('c', f);
+			fprintf(f, " %li %d %lu\n", (long)-4, (short)2,
+				(unsigned long)2);
+		}
+		fclose(f);
 		break;
 	}
 	default:
