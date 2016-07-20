@@ -17,6 +17,70 @@ enum {
 	MODE_FPUTS,
 };
 
+void print_num_l(long num, FILE *f)
+{
+	int neg = 0;
+	char buf[22], *s;
+
+	buf[21] = '\0';
+	s = &buf[20];
+
+	if (num < 0) {
+		neg = 1;
+		num = -num;
+	} else if (num == 0) {
+		*s = '0';
+		s--;
+		goto done;
+	}
+
+	while (num > 0) {
+		*s = (num % 10) + '0';
+		s--;
+		num /= 10;
+	}
+
+	if (neg) {
+		*s = '-';
+		s--;
+	}
+done:
+	s++;
+	fputs(s, f);
+}
+
+void print_num(int num, FILE *f)
+{
+	int neg = 0;
+	char buf[12], *s;
+
+	buf[11] = '\0';
+	s = &buf[10];
+
+	if (num < 0) {
+		neg = 1;
+		num = -num;
+	} else if (num == 0) {
+		*s = '0';
+		s--;
+		goto done;
+	}
+
+	while (num > 0) {
+		*s = (num % 10) + '0';
+		s--;
+		num /= 10;
+	}
+
+	if (neg) {
+		*s = '-';
+		s--;
+	}
+done:
+	s++;
+	fputs(s, f);
+}
+
 int main(int argc, char *argv[])
 {
 	static const char str1[] = "String1 String1";
@@ -164,8 +228,13 @@ int main(int argc, char *argv[])
 			fputs(str2, f);
 			putc(' ', f);
 			putc('c', f);
-			fprintf(f, " %li %d %lu\n", (long)-4, (short)2,
-				(unsigned long)2);
+			putc(' ', f);
+			print_num_l(-4, f);
+			putc(' ', f);
+			print_num(2, f);
+			putc(' ', f);
+			print_num_l(2, f); /* XXX: add print_num_u() */
+			putc('\n', f);
 		}
 		fclose(f);
 		break;
