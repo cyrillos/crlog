@@ -14,7 +14,72 @@ enum {
 	MODE_FPRINTF,
 	MODE_SPRINTF,
 	MODE_DPRINTF,
+	MODE_FPUTS,
 };
+
+void print_num_l(long num, FILE *f)
+{
+	int neg = 0;
+	char buf[22], *s;
+
+	buf[21] = '\0';
+	s = &buf[20];
+
+	if (num < 0) {
+		neg = 1;
+		num = -num;
+	} else if (num == 0) {
+		*s = '0';
+		s--;
+		goto done;
+	}
+
+	while (num > 0) {
+		*s = (num % 10) + '0';
+		s--;
+		num /= 10;
+	}
+
+	if (neg) {
+		*s = '-';
+		s--;
+	}
+done:
+	s++;
+	fputs(s, f);
+}
+
+void print_num(int num, FILE *f)
+{
+	int neg = 0;
+	char buf[12], *s;
+
+	buf[11] = '\0';
+	s = &buf[10];
+
+	if (num < 0) {
+		neg = 1;
+		num = -num;
+	} else if (num == 0) {
+		*s = '0';
+		s--;
+		goto done;
+	}
+
+	while (num > 0) {
+		*s = (num % 10) + '0';
+		s--;
+		num /= 10;
+	}
+
+	if (neg) {
+		*s = '-';
+		s--;
+	}
+done:
+	s++;
+	fputs(s, f);
+}
 
 int main(int argc, char *argv[])
 {
@@ -55,6 +120,8 @@ int main(int argc, char *argv[])
 				mode = MODE_SPRINTF;
 			} else if (strcmp(optarg, "dprintf") == 0) {
 				mode = MODE_DPRINTF;
+			} else if (strcmp(optarg, "fputs") == 0) {
+				mode = MODE_FPUTS;
 			} else
 				goto usage;
 			break;
@@ -148,6 +215,28 @@ int main(int argc, char *argv[])
 				str1, str2, 'c', (long)-4, (short)2,
 				(unsigned long)2);
 		}
+		break;
+	}
+	case MODE_FPUTS:
+	{
+		FILE *f = fdopen(fdout, "w");
+
+		for (i = 0; i < niter; i++) {
+			fputs("Some message ", f);
+			fputs(str1, f);
+			putc(' ', f);
+			fputs(str2, f);
+			putc(' ', f);
+			putc('c', f);
+			putc(' ', f);
+			print_num_l(-4, f);
+			putc(' ', f);
+			print_num(2, f);
+			putc(' ', f);
+			print_num_l(2, f); /* XXX: add print_num_u() */
+			putc('\n', f);
+		}
+		fclose(f);
 		break;
 	}
 	default:

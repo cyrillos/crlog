@@ -44,7 +44,8 @@ $(CRLOG_SO): src/built-in.o
 	$(Q) $(CC) -shared $(cflags-so) -o $@ $^
 
 CLI			:= crlog
-CLI-LIBS		:= -lffi
+CLI-LIBS		:= $(shell pkg-config --libs libffi)
+CFLAGS			+= $(shell pkg-config --cflags libffi)
 
 $(eval $(call gen-built-in,cli))
 
@@ -85,18 +86,18 @@ uninstall:
 tags:
 	$(call msg-gen, $@)
 	$(Q) $(RM) tags
-	$(Q) $(FIND) . -name '*.[hcS]' ! -path './.*' ! -path './test/*' -print | xargs $(CTAGS) -a
+	$(Q) $(FIND) . -name '*.[hcS]' ! -path './.*' ! -path './tests/*' -print | xargs $(CTAGS) -a
 .PHONY: tags
 
 etags:
 	$(call msg-gen, $@)
 	$(Q) $(RM) TAGS
-	$(Q) $(FIND) . -name '*.[hcS]' ! -path './.*' ! -path './test/*' -print | xargs $(ETAGS) -a
+	$(Q) $(FIND) . -name '*.[hcS]' ! -path './.*' ! -path './tests/*' -print | xargs $(ETAGS) -a
 .PHONY: etags
 
 cscope:
 	$(call msg-gen, $@)
-	$(Q) $(FIND) . -name '*.[hcS]' ! -path './.*' ! -path './test/*' ! -type l -print > cscope.files
+	$(Q) $(FIND) . -name '*.[hcS]' ! -path './.*' ! -path './tests/*' ! -type l -print > cscope.files
 	$(Q) $(CSCOPE) -bkqu
 .PHONY: cscope
 
@@ -104,7 +105,9 @@ all: $(CRLOG_SO) $(CLI)
 	@true
 .PHONY: all
 
-test:
+test: override CPP=g++
+test: $(CLI)
+	$(Q) $(CPP) tests/fstream.cpp -o tests/fstream
 	$(Q) tests/test00
 .PHONY: test
 

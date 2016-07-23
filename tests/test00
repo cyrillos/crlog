@@ -18,6 +18,12 @@ time ./crlog -m dprintf -i $niter -o /tmp/crlog.dprintf.txt
 echo === Use sprintf
 time ./crlog -m sprintf -i $niter
 
+echo === Use fputs
+time ./crlog -m fputs -i $niter -o /tmp/crlog.fputs.txt
+
+echo === Use fstream
+time ./tests/fstream $niter
+
 echo === Decode binary
 time ./crlog -d < /tmp/crlog.raw.map > /tmp/crlog.raw.map.txt
 
@@ -25,3 +31,5 @@ echo === Compare outputs
 cmp /tmp/crlog.raw.map.txt /tmp/crlog.fprintf.txt
 cmp /tmp/crlog.raw.txt /tmp/crlog.fprintf.txt
 cmp /tmp/crlog.dprintf.txt /tmp/crlog.fprintf.txt
+cmp /tmp/crlog.fputs.txt /tmp/crlog.fprintf.txt
+cmp /tmp/crlog.fstream.txt /tmp/crlog.fprintf.txt
