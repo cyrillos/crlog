@@ -43,13 +43,37 @@ $(CRLOG_SO): src/built-in.o
 	$(call msg-link, $@)
 	$(Q) $(CC) -shared $(cflags-so) -o $@ $^
 
+PLUGIN_INCLUDE		:= $(shell gcc -print-file-name=plugin)
+ifeq ($(PLUGIN_INCLUDE),plugin)
+        $(error Error: GCC API for plugins is not installed on your system)
+endif
+
+CPRINTF			:= cprintf/cprintf
+CPRINTF_SO		:= $(addsuffix .so,$(CPRINTF))
+CXX			:= g++
+CXXFLAGS		+= -I $(PLUGIN_INCLUDE)/include
+CXXFLAGS		+= -fPIC -fno-rtti
+LDFLAGS_PLUGIN		:= -shared -fno-rtti
+
+$(CPRINTF_SO): $(CPRINTF).o
+	$(CXX) $(LDFLAGS) $(LDFLAGS_PLUGIN) -o $@ $<
+
+$(CPRINTF).o: $(CPRINTF).cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
 CLI			:= crlog
+CLI-CPRINTF		:= crlog.cprintf
 CLI-LIBS		:= $(shell pkg-config --libs libffi)
 CFLAGS			+= $(shell pkg-config --cflags libffi)
 
+cli/cli-cprintf.built-in.o: $(CPRINTF_SO)
 $(eval $(call gen-built-in,cli))
 
-$(CLI): cli/built-in.o src/built-in.o
+$(CLI): cli/cli.built-in.o src/built-in.o
+	$(call msg-link, $@)
+	$(Q) $(CC) -o $@ $(CLI-LIBS) $^
+
+$(CLI-CPRINTF): cli/cli-cprintf.built-in.o src/built-in.o
 	$(call msg-link, $@)
 	$(Q) $(CC) -o $@ $(CLI-LIBS) $^
 
@@ -57,7 +81,8 @@ clean:
 	$(Q) $(MAKE) $(build)=src $@
 	$(Q) $(MAKE) $(build)=cli $@
 	$(Q) $(RM) $(CRLOG_SO)
-	$(Q) $(RM) $(CLI)
+	$(Q) $(RM) $(CLI) $(CLI-CPRINTF)
+	$(Q) $(RM) $(CPRINTF_SO) $(CPRINTF).o
 .PHONY: clean
 
 UAPI_HEADERS := include/uapi/crlog.h
@@ -101,12 +126,12 @@ cscope:
 	$(Q) $(CSCOPE) -bkqu
 .PHONY: cscope
 
-all: $(CRLOG_SO) $(CLI)
+all: $(CRLOG_SO) $(CLI) $(CLI-CPRINTF)
 	@true
 .PHONY: all
 
 test: override CPP=g++
-test: $(CLI)
+test: $(CLI) $(CPRINTF_SO) $(CLI-CPRINTF)
 	$(Q) $(CPP) tests/fstream.cpp -o tests/fstream
 	$(Q) tests/test00
 .PHONY: test
