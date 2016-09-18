@@ -24,6 +24,9 @@ time ./crlog -m fputs -i $niter -o /tmp/crlog.fputs.txt
 echo === Use fstream
 time ./tests/fstream $niter
 
+echo === Use cprintf plugin with fprintf
+time ./crlog.cprintf -m fprintf -i $niter -o /tmp/crlog.cprintf.txt
+
 echo === Decode binary
 time ./crlog -d < /tmp/crlog.raw.map > /tmp/crlog.raw.map.txt
 
@@ -33,3 +36,4 @@ cmp /tmp/crlog.raw.txt /tmp/crlog.fprintf.txt
 cmp /tmp/crlog.dprintf.txt /tmp/crlog.fprintf.txt
 cmp /tmp/crlog.fputs.txt /tmp/crlog.fprintf.txt
 cmp /tmp/crlog.fstream.txt /tmp/crlog.fprintf.txt
+cmp /tmp/crlog.fputs.txt /tmp/crlog.cprintf.txt

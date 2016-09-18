@@ -1,6 +1,8 @@
 .git-ignore/
 tags
 crlog
+crlog.cprintf
+tests/fstream
 *.swp
 *.o
 *.d

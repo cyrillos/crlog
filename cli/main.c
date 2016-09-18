@@ -17,7 +17,17 @@ enum {
 	MODE_FPUTS,
 };
 
-void print_num_l(long num, FILE *f)
+void __putc(FILE *f, int c)
+{
+	_IO_putc(c, f);
+}
+
+void __puts(FILE *f, const char *str)
+{
+	fputs(str, f);
+}
+
+void __putlong(FILE *f, long num)
 {
 	int neg = 0;
 	char buf[22], *s;
@@ -46,10 +56,10 @@ void print_num_l(long num, FILE *f)
 	}
 done:
 	s++;
-	fputs(s, f);
+	fwrite(s, 1, 21 - (s - buf), f);
 }
 
-void print_num(int num, FILE *f)
+void __putint(FILE *f, int num)
 {
 	int neg = 0;
 	char buf[12], *s;
@@ -78,7 +88,18 @@ void print_num(int num, FILE *f)
 	}
 done:
 	s++;
-	fputs(s, f);
+	fwrite(s, 1, 11 - (s - buf), f);
+}
+
+void __putulong(FILE *f, unsigned long num)
+{
+	/* XXX: make ul version */
+	__putlong(f, (long)num);
+}
+
+void __putwrite(FILE *f, const char *str, size_t size, size_t nmemb)
+{
+	fwrite(str, size, nmemb, f);
 }
 
 int main(int argc, char *argv[])
@@ -229,11 +250,11 @@ int main(int argc, char *argv[])
 			putc(' ', f);
 			putc('c', f);
 			putc(' ', f);
-			print_num_l(-4, f);
+			__putlong(f, -4);
 			putc(' ', f);
-			print_num(2, f);
+			__putint(f, 2);
 			putc(' ', f);
-			print_num_l(2, f); /* XXX: add print_num_u() */
+			__putlong(f, 2); /* XXX: add print_num_u() */
 			putc('\n', f);
 		}
 		fclose(f);
